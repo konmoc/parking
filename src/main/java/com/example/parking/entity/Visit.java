@@ -24,4 +24,6 @@ public class Visit {
     @Enumerated(EnumType.STRING)
     private VisitStatus status;
 
+
+
 }
