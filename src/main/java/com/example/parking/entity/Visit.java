@@ -18,7 +18,6 @@ public class Visit {
     @NotNull
     private LocalDateTime startTime;
     private LocalDateTime endTime;
-    private Double moneyToBePaid;
     @Enumerated(EnumType.STRING)
     private DriverType driverType;
     @Enumerated(EnumType.STRING)

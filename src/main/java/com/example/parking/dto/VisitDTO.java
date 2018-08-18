@@ -17,4 +17,8 @@ public class VisitDTO {
     private DriverType driverType;
     private VisitStatus status;
 
+
+    private Double calculateMoneyForVisit(){
+
+    }
 }

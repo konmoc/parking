@@ -8,10 +8,14 @@ import com.example.parking.exceptions.VisitNotFoundException;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PathVariable;
 
 import java.time.Duration;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -61,12 +65,13 @@ public class VisitService {
                 .orElseThrow(() -> new VisitNotFoundException(registrationPlate));
     }
 
-    public VisitDTO endVisit(@PathVariable Long id) throws VisitNotFoundException{
+    public VisitDTO endVisit(@PathVariable Long id) throws VisitNotFoundException {
         return Optional.ofNullable(visitRepository.findVisitById(id))
-                .map(visit -> { visit.setEndTime(LocalDateTime.now());
-                                visit.setStatus(VisitStatus.ENDED);
-                                saveVisit(visit);
-                                return convertToDto(visit);
+                .map(visit -> {
+                    visit.setEndTime(LocalDateTime.now());
+                    visit.setStatus(VisitStatus.ENDED);
+                    saveVisit(visit);
+                    return convertToDto(visit);
                 })
                 .orElseThrow(() -> new VisitNotFoundException(id));
     }
@@ -101,10 +106,32 @@ public class VisitService {
         return cost;
     }
 
-    private VisitDTO convertToDto(Visit visit) {
+    public VisitDTO convertToDto(Visit visit) {
         ModelMapper modelMapper = new ModelMapper();
         VisitDTO visitDTO = modelMapper.map(visit, VisitDTO.class);
         return visitDTO;
+    }
+
+    public Visit convertToEntity(VisitDTO visitDTO) {
+        ModelMapper modelMapper = new ModelMapper();
+        Visit visit = modelMapper.map(visitDTO, Visit.class);
+        return visit;
+    }
+
+    public double getMoneyFromAllVisitsWhichEndedDuringGivenDay(LocalDate requestedDate){
+        List<Visit> allVisits = visitRepository.findAll();
+        double moneyEarned=0;
+        for(Visit v : allVisits){
+            LocalDate visitDate = v.getEndTime().toLocalDate();
+            if(visitDate.equals(requestedDate)){
+                try {
+                    moneyEarned+=getMoneyForVisitWithId(v.getId());
+                } catch (VisitNotFoundException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        return moneyEarned;
     }
 
 }
